@@ -29,7 +29,7 @@ class MyApp(QtWidgets.QWidget):
 
         # Crea un visor web para cargar la página de Twitter
         self.twitter_view = QtWebEngineWidgets.QWebEngineView()
-        self.twitter_view.setUrl(QtCore.QUrl("https://twitter.com/F1"))
+        self.twitter_view.setUrl(QtCore.QUrl("https://f1.com/"))
         self.lTwitter.addWidget(self.twitter_view)
 
         # Obtén el podio y clasificación (esto se puede mover a funciones separadas si es necesario)

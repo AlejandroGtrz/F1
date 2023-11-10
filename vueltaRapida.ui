@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>wPrincipal</class>
- <widget class="QMainWindow" name="wPrincipal">
+ <class>wVueltaRapida</class>
+ <widget class="QMainWindow" name="wVueltaRapida">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -14,43 +14,53 @@
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <widget class="QPushButton" name="bPilotos">
+   <widget class="QLineEdit" name="tGranPremio">
     <property name="geometry">
      <rect>
-      <x>240</x>
+      <x>40</x>
+      <y>50</y>
+      <width>281</width>
+      <height>21</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QLabel" name="lGranPremio">
+    <property name="geometry">
+     <rect>
+      <x>40</x>
+      <y>20</y>
+      <width>121</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Gran Premio</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="bVuelta">
+    <property name="geometry">
+     <rect>
+      <x>330</x>
+      <y>40</y>
+      <width>191</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Buscar Vuelta Rapida</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="lTexto">
+    <property name="geometry">
+     <rect>
+      <x>40</x>
       <y>120</y>
-      <width>161</width>
-      <height>51</height>
+      <width>281</width>
+      <height>81</height>
      </rect>
     </property>
     <property name="text">
-     <string>Ver Pilotos</string>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="bClasificacion">
-    <property name="geometry">
-     <rect>
-      <x>240</x>
-      <y>180</y>
-      <width>161</width>
-      <height>51</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Ver Clasificación</string>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="bCircuitos">
-    <property name="geometry">
-     <rect>
-      <x>240</x>
-      <y>240</y>
-      <width>161</width>
-      <height>51</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Records de Circuitos</string>
+     <string/>
     </property>
    </widget>
   </widget>
