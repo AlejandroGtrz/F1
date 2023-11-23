@@ -1,10 +1,10 @@
 import sys
 import mpld3
-from PyQt6.QtWidgets import QApplication, QWidget, QHBoxLayout, QVBoxLayout, QComboBox, QLineEdit
-from PyQt6.QtCore import Qt
-from PyQt6 import uic
-from PyQt6.QtCore import QThread, pyqtSignal
-from PyQt6.QtWidgets import QProgressDialog
+# With these lines:
+from PyQt5.QtWidgets import QApplication, QWidget, QHBoxLayout, QVBoxLayout, QComboBox, QLineEdit, QProgressBar
+from PyQt5.QtCore import QThread, pyqtSignal
+from PyQt5.QtCore import Qt
+from PyQt5 import uic, QtGui
 import pandas as pd
 import seaborn as sns
 from Listas import años
@@ -12,7 +12,6 @@ from Listas import estadisticas_circuitos
 from fastf1.core import Laps
 from timple.timedelta import strftimedelta
 import numpy as np
-import pruebaF1 as f1
 import fastf1 as ff1
 from fastf1 import plotting
 import matplotlib as mpl
@@ -25,10 +24,9 @@ import json
 import numpy as np
 from matplotlib.collections import LineCollection
 from fastf1.plotting import driver_color
-mpl.use('QT5Agg')
+mpl.use('Qt5Agg')
 
-
-from matplotlib.backends.backend_qt5agg import FigureCanvas 
+from matplotlib.backends.backend_qt5agg import FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 from matplotlib.figure import Figure
 
@@ -47,7 +45,7 @@ class RitmoCarreraThread(QThread):
         self.circuito = circuito
         
     def run(self):
-        ff1.Cache.enable_cache('/Users/alejandrogutierrezalvarez/Desktop/F1')
+        ff1.Cache.enable_cache('./')
         granPremio = ff1.get_session(int(self.year), self.circuito, 'R')
         granPremio.load()
         laps=granPremio.laps
@@ -70,11 +68,18 @@ class Circuitos(QWidget):
         self.circuitos={}
         self.bAnio.addItems(años)
         self.bAnio.activated.connect(self.addCircuitos)
+        self.bAnio.setPlaceholderText("Seleccionar")
         self.bAnio.setCurrentIndex(-1)
         self.bCircuito.activated.connect(self.addEstadisticas)
+        self.bCircuito.setPlaceholderText("Seleccionar")
         self.bEstadistica.activated.connect(self.addPilotos)
+        self.bEstadistica.setPlaceholderText("Seleccionar")
         self.bBuscar.pressed.connect(self.redirecciona)
+        self.bPdf.setIcon(QtGui.QIcon('Resources/pdf.png'))
+        self.bPdf.pressed.connect(self.ExportarPDF)
 
+    def ExportarPDF(self):
+        self.plotter.itemAt(0).widget().figure.savefig('./Figura.pdf')
     def addCircuitos(self):
         self.bCircuito.clear()
         self.bEstadistica.clear()
@@ -120,7 +125,7 @@ class Circuitos(QWidget):
             # You can display an error message or handle it as needed
             return
 
-        ff1.Cache.enable_cache('/Users/alejandrogutierrezalvarez/Desktop/F1')
+        ff1.Cache.enable_cache('./')
         session = ff1.get_session(int(year), circuito, 'R')
         weekend = session.event
         session.load()
@@ -159,7 +164,7 @@ class Circuitos(QWidget):
         # Create a colorbar
         cbaxes = fig.add_axes([0.25, 0.05, 0.5, 0.05])
         normlegend = mpl.colors.Normalize(vmin=color.min(), vmax=color.max())
-        legend = mpl.colorbar.ColorbarBase(cbaxes, norm=normlegend, cmap=colormap, orientation="horizontal")
+        legend = mpl.colorbar.Colorbar(cbaxes, norm=normlegend, cmap=colormap, orientation="horizontal")
 
         # Clear the previous layout and add the new figure
         self.clearLayout(self.plotter)
@@ -188,7 +193,7 @@ class Circuitos(QWidget):
             circuito = self.bCircuito.currentText()
             
             # Paso 0: Crear una instancia de QProgressDialog
-            progress_dialog = QProgressDialog("Calculando ritmo de carrera...", "cancelar" , 0, 0, self)
+            progress_dialog = QProgressBar(self)
             #progress_dialog.setCancelButton(0)
             progress_dialog.setWindowModality(Qt.WindowModality.ApplicationModal)
             progress_dialog.show()
@@ -212,7 +217,7 @@ class Circuitos(QWidget):
     def ritmoCarrera(self):
         pilotos=self.listaPilotos
         year=self.bAnio.currentText()
-        ff1.Cache.enable_cache('/Users/alejandrogutierrezalvarez/Desktop/F1')
+        ff1.Cache.enable_cache('./')
         granPremio = ff1.get_session(int(year), self.bCircuito.currentText(), 'R')
         laps = granPremio.load().laps
         laps['LapTimeSeconds'] = laps['LapTime'].dt.total_seconds()
@@ -229,7 +234,7 @@ class Circuitos(QWidget):
 
     def verQualy(self):
         year=self.bAnio.currentText()
-        ff1.Cache.enable_cache('/Users/alejandrogutierrezalvarez/Desktop/F1')
+        ff1.Cache.enable_cache('./')
         ff1.plotting.setup_mpl(mpl_timedelta_support=True, color_scheme=None, misc_mpl_mods=False)
         quali = ff1.get_session(int(year), self.bCircuito.currentText(), 'Q')
         quali.load()
@@ -267,7 +272,7 @@ class Circuitos(QWidget):
 
     def infoNeumaticos(self):
         year=self.bAnio.currentText()
-        ff1.Cache.enable_cache('/Users/alejandrogutierrezalvarez/Desktop/F1')
+        ff1.Cache.enable_cache('./')
         session = ff1.get_session(int(year), self.bCircuito.currentText(), 'R')
         session.load()
         laps = session.laps
@@ -312,7 +317,7 @@ class Circuitos(QWidget):
         pilotos=self.listaPilotos
         #cargo la sesion y selecciono el piloto
         year=self.bAnio.currentText()
-        ff1.Cache.enable_cache('/Users/alejandrogutierrezalvarez/Desktop/F1')
+        ff1.Cache.enable_cache('./')
         granPremio = ff1.get_session(int(year), self.bCircuito.currentText(), 'R')	
         laps=granPremio.load()
         laps=granPremio.laps
@@ -372,7 +377,7 @@ class Circuitos(QWidget):
     def tiempoVueltas(self):
         pilotos=self.listaPilotos
         year=self.bAnio.currentText()
-        ff1.Cache.enable_cache('/Users/alejandrogutierrezalvarez/Desktop/F1')
+        ff1.Cache.enable_cache('./')
         granPremio = ff1.get_session(int(year), self.bCircuito.currentText(), 'R')
         granPremio.load()
         laps=granPremio.laps
@@ -412,7 +417,7 @@ class Circuitos(QWidget):
     def adelantamientos(self):
         ff1.plotting.setup_mpl(misc_mpl_mods=False)
         year = self.bAnio.currentText()
-        ff1.Cache.enable_cache('/Users/alejandrogutierrezalvarez/Desktop/F1')
+        ff1.Cache.enable_cache('./')
         session = ff1.get_session(2023, self.bCircuito.currentText(), 'R')
         session.load(telemetry=False, weather=False)
         fig, ax = plt.subplots(figsize=(8.0, 4.9))
@@ -438,7 +443,7 @@ class Circuitos(QWidget):
         self.plotter.addWidget(FigureCanvas(fig))
     def marchasVuelta(self):
         year=self.bAnio.currentText()
-        ff1.Cache.enable_cache('/Users/alejandrogutierrezalvarez/Desktop/F1')
+        ff1.Cache.enable_cache('./')
         session = ff1.get_session(int(year), self.bCircuito.currentText(), 'R')
         session.load()
         laps = session.laps

@@ -1,11 +1,10 @@
 import sys
-from PyQt6 import QtWidgets
-from PyQt6.QtWidgets import QApplication, QWidget, QHBoxLayout, QVBoxLayout
-from PyQt6.QtCore import Qt
-from PyQt6 import uic
+from PyQt5 import QtWidgets
+from PyQt5.QtWidgets import QApplication, QWidget, QHBoxLayout, QVBoxLayout
+from PyQt5.QtCore import Qt
+from PyQt5 import uic
 from Listas import años
 import numpy as np
-import pruebaF1 as f1
 import fastf1 as ff1
 import matplotlib
 import requests

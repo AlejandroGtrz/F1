@@ -1,8 +1,8 @@
 import sys
 import requests
-from PyQt6.QtWidgets import QApplication, QMainWindow, QHBoxLayout, QWidget, QLabel, QScrollArea, QVBoxLayout, QPushButton
-from PyQt6.QtGui import QFont, QPixmap
-from PyQt6.QtCore import Qt
+from PyQt5.QtWidgets import QApplication, QMainWindow, QHBoxLayout, QWidget, QLabel, QScrollArea, QVBoxLayout, QPushButton
+from PyQt5.QtGui import QFont, QPixmap
+from PyQt5.QtCore import Qt
 
 class Pilotos(QMainWindow):
     def __init__(self):
@@ -10,6 +10,7 @@ class Pilotos(QMainWindow):
 
         self.setWindowTitle("Lista de Pilotos de Fórmula 1")
         self.setGeometry(100, 100, 500, 720)
+        self.setMinimumSize(500, 720)  # Establece el tamaño mínimo de la ventana
         self.setStyleSheet("background-color: white;")
 
         # Crea una lista de pilotos de Fórmula 1.
@@ -30,11 +31,9 @@ class Pilotos(QMainWindow):
             card_layout = QHBoxLayout(card_widget)
             card_widget.setStyleSheet("background-color: #f0f0f0; border: 1px solid #ccc; margin: 5px; padding: 5px;")
 
-
             # Crear una etiqueta para mostrar el nombre y los puntos en líneas separadas
             nombre_label = QLabel(f"{piloto['nombre']} {piloto['apellido']}\nPuntos: {piloto['puntos']}\nPosición: {piloto['posicion']}")
             nombre_label.setFont(QFont("Times New Roman", 14))
-            nombre_label.setFixedSize(200, 200)  # Establece el tamaño deseado
 
             # Agrega una imagen desde la URL obtenida del diccionario de piloto.
             # Agrega manejo de errores al cargar imágenes.
@@ -44,11 +43,31 @@ class Pilotos(QMainWindow):
                 imagen_data = response.content
                 pixmap = QPixmap()
                 pixmap.loadFromData(imagen_data)
-                pixmap = pixmap.scaled(200, 200, Qt.AspectRatioMode.KeepAspectRatio)  # Ajusta el tamaño de la imagen
+                if pixmap.isNull():
+                    pixmap2 = QPixmap('Resources/Unknown.png')
+                    pixmap2 = pixmap2.scaled(200, 200, Qt.AspectRatioMode.KeepAspectRatio)  # Ajusta el tamaño de la imagen
+                    imagen_label = QLabel(self)
+                    imagen_label.setPixmap(pixmap2)
+                    imagen_label.setAlignment(Qt.AlignmentFlag.AlignTop)  # Alinear la imagen en la parte superior
+                    imagen_label.setScaledContents(True)  # Permitir escalar el contenido de la etiqueta
+                else:
+                    pixmap = pixmap.scaled(200, 200, Qt.AspectRatioMode.KeepAspectRatio)  # Ajusta el tamaño de la imagen
+                    imagen_label = QLabel(self)
+                    imagen_label.setPixmap(pixmap)
+                    imagen_label.setAlignment(Qt.AlignmentFlag.AlignTop)  # Alinear la imagen en la parte superior
+                    imagen_label.setScaledContents(True)  # Permitir escalar el contenido de la etiqueta
+                """Opcion 2, tamaño de imagen estatico pero creo que queda mejor
+                #response = requests.get(imagen_url)
+                #imagen_data = response.content
+                #pixmap = QPixmap()
+                #pixmap.loadFromData(imagen_data)
+                #pixmap = pixmap.scaled(200, 200, Qt.AspectRatioMode.KeepAspectRatio)  # Ajusta el tamaño de la imagen
                 imagen_label = QLabel(self)
                 imagen_label.setPixmap(pixmap)
                 imagen_label.setFixedSize(200, 200)  # Establece el tamaño deseado
+                """
 
+                
             card_layout.addWidget(imagen_label)
             card_layout.addWidget(nombre_label)
             card_layout.setAlignment(Qt.AlignmentFlag.AlignTop)

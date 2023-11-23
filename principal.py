@@ -2,7 +2,9 @@ import sys
 from PyQt5 import QtWidgets, QtGui, QtCore, uic, QtWebEngineWidgets, uic
 import requests
 import json
-from comparativas import Comparativas
+from circuitos import Circuitos
+from pilotos import Pilotos
+from clasificacion import Clasificacion
 
 class MyApp(QtWidgets.QWidget):
     def __init__(self):
@@ -18,14 +20,13 @@ class MyApp(QtWidgets.QWidget):
 
         self.bPilotos.setIcon(QtGui.QIcon('Resources/Pilotos.png'))
         self.bPilotos.setIconSize(QtCore.QSize(64, 64))
-        self.bPilotos.pressed.connect(self.Abrir_Comparativas)
+        self.bPilotos.pressed.connect(self.Abrir_Pilotos)
 
         self.bCircuitos.setIcon(QtGui.QIcon('Resources/Circuitos.png'))
         self.bCircuitos.setIconSize(QtCore.QSize(64, 64))
         self.bCircuitos.pressed.connect(self.Abrir_Circuitos)
 
-        self.bParadas.setIcon(QtGui.QIcon('Resources/Pitstop.png'))
-        self.bParadas.setIconSize(QtCore.QSize(64, 64))
+
 
         # Crea un visor web para cargar la página de Twitter
         self.twitter_view = QtWebEngineWidgets.QWebEngineView()
@@ -62,11 +63,11 @@ class MyApp(QtWidgets.QWidget):
             self.twClasificacion.setItem(self.twClasificacion.rowCount() - 1, 1, item)
 
     def Abrir_Clasificacion(self):
-        # Aquí puedes realizar alguna acción relacionada con la clasificación si lo deseas.
-        pass
+        self.ui = Clasificacion()
+        self.ui.show()
 
-    def Abrir_Comparativas(self):
-        self.ui = Comparativas()
+    def Abrir_Pilotos(self):
+        self.ui = Pilotos()
         self.ui.show()
 
     def Abrir_Circuitos(self):
