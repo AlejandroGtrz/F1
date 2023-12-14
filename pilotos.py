@@ -32,7 +32,7 @@ class Pilotos(QMainWindow):
             card_widget.setStyleSheet("background-color: #f0f0f0; border: 1px solid #ccc; margin: 5px; padding: 5px;")
 
             # Crear una etiqueta para mostrar el nombre y los puntos en líneas separadas
-            nombre_label = QLabel(f"{piloto['nombre']} {piloto['apellido']}\nPuntos: {piloto['puntos']}\nPosición: {piloto['posicion']}")
+            nombre_label = QLabel(f"{piloto['nombre']} {piloto['apellido']}\nPuntos: {piloto['puntos']}\nPosición: {piloto['posicion']}\nVicotrias: {piloto['victorias']}\nTitulos: {piloto['titulos_mundiales']}")
             nombre_label.setFont(QFont("Times New Roman", 14))
 
             # Agrega una imagen desde la URL obtenida del diccionario de piloto.
@@ -87,11 +87,6 @@ class Pilotos(QMainWindow):
         self.setCentralWidget(central_widget)
 
 def obtener_pilotos():
-    """Obtiene la clasificación de pilotos de Fórmula 1 de la API de ergast, incluyendo sus imágenes desde un archivo.
-
-    Devuelve:
-        Una lista de diccionarios, donde cada diccionario contiene la información de un piloto.
-    """
     # Obtener los datos de la clasificación de pilotos desde la API de ergast.
     response_clasificacion = requests.get("http://ergast.com/api/f1/current/driverStandings.json")
     datos_clasificacion = response_clasificacion.json()
@@ -99,12 +94,8 @@ def obtener_pilotos():
     # Obtener los datos de los pilotos desde la API de ergast.
     response_pilotos = requests.get("http://ergast.com/api/f1/current/drivers.json")
     datos_pilotos = response_pilotos.json()
-    
-    pilotos = []
 
-    # Leer las URLs de las imágenes desde el archivo drivers_img.txt.
-    with open("Resources/drivers_img.txt", "r") as archivo:
-        lineas = archivo.readlines()
+    pilotos = []
 
     if "MRData" in datos_clasificacion and "StandingsTable" in datos_clasificacion["MRData"]:
         standings = datos_clasificacion["MRData"]["StandingsTable"]["StandingsLists"]
@@ -112,19 +103,38 @@ def obtener_pilotos():
             pilotos_data = standings[0]["DriverStandings"]
 
             for i, piloto_data in enumerate(pilotos_data):
+                # Obtener información adicional de cada piloto usando la API de Ergast Developer.
+                url_detallada = f"http://ergast.com/api/f1/drivers/{piloto_data['Driver']['driverId']}.json"
+                response_detallada = requests.get(url_detallada)
+                datos_detallados = response_detallada.json()
+
+                # Obtener la cantidad de victorias.
+                url_victorias = f"http://ergast.com/api/f1/drivers/{piloto_data['Driver']['driverId']}/results.json?limit=1000"
+                response_victorias = requests.get(url_victorias)
+                datos_victorias = response_victorias.json()
+
+                victorias = sum(result.get("position", "") == "1" for result in datos_victorias.get("MRData", {}).get("RaceTable", {}).get("Races", []))
+
+                # Obtener la cantidad de títulos mundiales.
+                url_titulos_mundiales = f"http://ergast.com/api/f1/drivers/{piloto_data['Driver']['driverId']}/driverStandings/1.json"
+                response_titulos_mundiales = requests.get(url_titulos_mundiales)
+                datos_titulos_mundiales = response_titulos_mundiales.json()
+
+                titulos_mundiales = len(datos_titulos_mundiales.get("MRData", {}).get("StandingsTable", {}).get("StandingsLists", []))
+
                 piloto = {
                     "posicion": piloto_data["position"],
                     "nombre": piloto_data["Driver"]["givenName"],
                     "apellido": piloto_data["Driver"]["familyName"],
                     "puntos": piloto_data["points"],
-                    "imagen_url": "https://media.formula1.com/content/dam/fom-website/drivers/2023Drivers/"+piloto_data["Driver"]["familyName"]+".jpg.img.512.large.jpg"
+                    "imagen_url": f"https://media.formula1.com/content/dam/fom-website/drivers/2023Drivers/{piloto_data['Driver']['familyName']}.jpg.img.512.large.jpg",
+                    "victorias": victorias,
+                    "titulos_mundiales": titulos_mundiales
                 }
 
-                # Verificar si hay una URL en el archivo y asignarla al diccionario del piloto.
-                #if i < len(lineas):
-                #   piloto["imagen_url"] = lineas[i].strip()
-
                 pilotos.append(piloto)
+
+    return pilotos
 
     return pilotos
 

@@ -1,5 +1,6 @@
 import sys
 from PyQt5 import QtWidgets, QtGui, QtCore, uic, QtWebEngineWidgets, uic
+from PyQt5.QtCore import Qt
 import requests
 import json
 from circuitos import Circuitos
@@ -30,11 +31,21 @@ class MyApp(QtWidgets.QWidget):
 
         # Crea un visor web para cargar la página de Twitter
         self.twitter_view = QtWebEngineWidgets.QWebEngineView()
-        self.twitter_view.setUrl(QtCore.QUrl("https://f1.com/"))
+        self.twitter_view.setUrl(QtCore.QUrl("https://www.formula1.com/"))
         self.lTwitter.addWidget(self.twitter_view)
 
         # Obtén el podio y clasificación (esto se puede mover a funciones separadas si es necesario)
         self.Obtener_Podio()
+
+        # Personalizar el tamaño de las columnas de la tabla
+        self.twResultados.setColumnWidth(0, 70)
+        self.twResultados.setColumnWidth(1, 138)
+        self.twResultados.setColumnWidth(2, 70)
+
+        # Personalizar el alto del header
+        header = self.twResultados.horizontalHeader()
+        header.setFixedHeight(30)
+
 
     def Obtener_Podio(self):
         r = requests.get("http://ergast.com/api/f1/current/last/results.json")
@@ -43,11 +54,14 @@ class MyApp(QtWidgets.QWidget):
         for d in resultado:
             self.twResultados.insertRow(self.twResultados.rowCount())
             item = QtWidgets.QTableWidgetItem(d["position"])
+            item.setTextAlignment(Qt.AlignVCenter | Qt.AlignHCenter)
             self.twResultados.setItem(self.twResultados.rowCount() - 1, 0, item)
             item = QtWidgets.QTableWidgetItem(d["Driver"]["givenName"] + " " + d["Driver"]["familyName"])
-            self.twResultados.setItem(self.twResultados.rowCount() - 1, 2, item)
+            item.setTextAlignment(Qt.AlignVCenter | Qt.AlignHCenter)
+            self.twResultados.setItem(self.twResultados.rowCount() - 1, 1, item)            
             item = QtWidgets.QTableWidgetItem(d["points"])
-            self.twResultados.setItem(self.twResultados.rowCount() - 1, 1, item)
+            item.setTextAlignment(Qt.AlignVCenter | Qt.AlignHCenter)
+            self.twResultados.setItem(self.twResultados.rowCount() - 1, 2, item)
 
     def Obtener_Clasificacion(self):
         r = requests.get("http://ergast.com/api/f1/current/driverStandings.json")
@@ -58,9 +72,9 @@ class MyApp(QtWidgets.QWidget):
             item = QtWidgets.QTableWidgetItem(d["position"])
             self.twClasificacion.setItem(self.twClasificacion.rowCount() - 1, 0, item)
             item = QtWidgets.QTableWidgetItem(d["Driver"]["givenName"] + " " + d["Driver"]["familyName"])
-            self.twClasificacion.setItem(self.twClasificacion.rowCount() - 1, 2, item)
-            item = QtWidgets.QTableWidgetItem(d["points"])
             self.twClasificacion.setItem(self.twClasificacion.rowCount() - 1, 1, item)
+            item = QtWidgets.QTableWidgetItem(d["points"])
+            self.twClasificacion.setItem(self.twClasificacion.rowCount() - 1, 2, item)
 
     def Abrir_Clasificacion(self):
         self.ui = Clasificacion()

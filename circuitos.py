@@ -1,7 +1,7 @@
 import sys
 import mpld3
 # With these lines:
-from PyQt5.QtWidgets import QApplication, QWidget, QHBoxLayout, QVBoxLayout, QComboBox, QLineEdit, QProgressBar
+from PyQt5.QtWidgets import QApplication, QWidget, QHBoxLayout, QVBoxLayout, QComboBox, QLineEdit, QProgressBar, QDialog
 from PyQt5.QtCore import QThread, pyqtSignal
 from PyQt5.QtCore import Qt
 from PyQt5 import uic, QtGui
@@ -18,6 +18,7 @@ import matplotlib as mpl
 from matplotlib import pyplot as plt
 from matplotlib import cm
 from matplotlib.widgets import Button, RadioButtons, CheckButtons
+from matplotlib.animation import FuncAnimation
 from plotnine import ggplot, aes, geom_line
 import requests
 import json
@@ -74,9 +75,32 @@ class Circuitos(QWidget):
         self.bCircuito.setPlaceholderText("Seleccionar")
         self.bEstadistica.activated.connect(self.addPilotos)
         self.bEstadistica.setPlaceholderText("Seleccionar")
+        self.bEstadistica.currentIndexChanged.connect(self.actualizarTexto)
         self.bBuscar.pressed.connect(self.redirecciona)
         self.bPdf.setIcon(QtGui.QIcon('Resources/pdf.png'))
         self.bPdf.pressed.connect(self.ExportarPDF)
+
+
+
+    def actualizarTexto(self):
+        if(self.bEstadistica.currentText()=="Tiempo por vuelta"):
+            self.textEdit.setPlainText("Tiempo por vuelta: Muestra el tiempo que le ha llevado a cada piloto completar una vuelta")
+        if(self.bEstadistica.currentText()=="Telemetria"):
+            self.textEdit.setPlainText("Telemetria: Muestra distintos datos de la telemetría de los pilotos, cuanto pisan el acelerador, cuanto pisan el freno y la velocidad")
+        if(self.bEstadistica.currentText()=="Adelantamientos"):
+            self.textEdit.setPlainText("Adelantamientos: Permite ver como han ido evolucionando las posiciones de los pilotos en cada vuelta")
+        if(self.bEstadistica.currentText()=="Marchas vuelta"):
+            self.textEdit.setPlainText("Marchas vuelta: Dibuja el mapa del circuito seleccionado y lo divide en tramos en función de la marcha que tuviera engranada el piloto en cada uno")
+        if(self.bEstadistica.currentText()=="Ver Qualy"):
+            self.textEdit.setPlainText("Ver Qualy: Muestra los resultados de la Qualy para el año y circuito seleccionados")
+        if(self.bEstadistica.currentText()=="Tiempo medio pit stop"):
+            self.textEdit.setPlainText("Tiempo medio pit stop: Muestra el tiempo medio que pasan los pilotos en boxes")
+        if(self.bEstadistica.currentText()=="Mapa de velocidad"):
+            self.textEdit.setPlainText("Mapa de velocidad: Dibuja el mapa del circuito seleccionado y lo divide en tramos en función de la velocidad que tuviera el piloto en ese momento")
+        if(self.bEstadistica.currentText()=="Información de neumaticos"):
+            self.textEdit.setPlainText("Información de neumáticos: Muestra los diferentes compuestos de neumático que ha usado un piloto durante la carrera")
+        if(self.bEstadistica.currentText()=="Ritmo de carrera"):
+            self.textEdit.setPlainText("Ritmo de carrera: Muestra en forma de gráfico de cajas el ritmo que han tenido los pilotos durante una carrera")
 
     def ExportarPDF(self):
         self.plotter.itemAt(0).widget().figure.savefig('./Figura.pdf')
@@ -119,7 +143,7 @@ class Circuitos(QWidget):
 
     def mapaVelocidad(self):
         year = self.bAnio.currentText()
-        circuito = self.circuitos.get(self.bCircuito.currentText())  # Use .get() to handle missing key
+        circuito = self.bCircuito.currentText()  # Use .get() to handle missing key
         if circuito is None:
             # Handle the case where the circuit is missing
             # You can display an error message or handle it as needed
@@ -192,11 +216,19 @@ class Circuitos(QWidget):
             year = self.bAnio.currentText()
             circuito = self.bCircuito.currentText()
             
-            # Paso 0: Crear una instancia de QProgressDialog
-            progress_dialog = QProgressBar(self)
-            #progress_dialog.setCancelButton(0)
-            progress_dialog.setWindowModality(Qt.WindowModality.ApplicationModal)
-            progress_dialog.show()
+            # Paso 0: Crear una instancia de QDialog para mostrar la barra de progreso
+            progress_dialog = QDialog(self)
+            progress_dialog.setWindowTitle("Cargando...")
+            progress_dialog.setWindowModality(Qt.WindowModal)
+
+            # Crear una barra de progreso
+            progress_bar = QProgressBar(progress_dialog)
+            progress_bar.setRange(0, 0)  # Configurar la barra de progreso indeterminada
+            progress_bar.setAlignment(Qt.AlignCenter)
+
+            # Layout para el diálogo de progreso
+            layout = QVBoxLayout(progress_dialog)
+            layout.addWidget(progress_bar)
 
              # Paso 1: Crear una instancia de RitmoCarreraThread
             self.ritmo_carrera_thread = RitmoCarreraThread()
@@ -207,9 +239,12 @@ class Circuitos(QWidget):
             # Paso 3: Conectar la señal resultReady del hilo RitmoCarreraThread a una ranura en la clase principal Circuitos
             self.ritmo_carrera_thread.resultReady.connect(self.mostrar_grafico_ritmo_carrera)
             
+            self.ritmo_carrera_thread.finished.connect(progress_dialog.accept)
 
             # Paso 4: Iniciar el hilo RitmoCarreraThread
             self.ritmo_carrera_thread.start()
+            # Mostrar el diálogo de progreso
+            progress_dialog.exec_()
     def mostrar_grafico_ritmo_carrera(self, fig):
         # Mostrar el gráfico en un canvas de Matplotlib
         self.clearLayout(self.plotter)
@@ -313,6 +348,8 @@ class Circuitos(QWidget):
         self.clearLayout(self.plotter)
         self.plotter.addWidget(FigureCanvas(fig))
 
+
+ 
     def telemetria(self):
         pilotos=self.listaPilotos
         #cargo la sesion y selecciono el piloto
