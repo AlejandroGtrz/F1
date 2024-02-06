@@ -1,0 +1,12 @@
+Fastf1==3.2.1
+PyQt5==5.15.10
+matplotlib==3.8.2
+mpld3==0.5.10
+pandas==2.2.0
+seaborn==0.13.2
+timple==1.2.0
+numpy==1.26.4
+plotnine==0.12.4
+requests==2.31.0
+beautifulsoup4==4.12.3
+PyQtWebEngine==5.15.6
