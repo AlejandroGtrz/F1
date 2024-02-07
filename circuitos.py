@@ -156,8 +156,11 @@ class verQualyThread(QThread):
         fastest_laps['LapTimeDelta'] = fastest_laps['LapTime'] - pole_lap['LapTime']
         team_colors = list()
         for index, lap in fastest_laps.iterlaps():
-            color = ff1.plotting.team_color(lap['Team'])
-            team_colors.append(color)
+	    if pd.notna(lap['Team']):  # Comprobamos que el equipo no sea un valor NaT
+                color = ff1.plotting.team_color(lap['Team'])
+                team_colors.append(color)
+	    else:
+		team_colors.append(None)
         figure = Figure()
         ax = figure.add_subplot()
         ax.barh(fastest_laps.index, fastest_laps['LapTimeDelta'],
