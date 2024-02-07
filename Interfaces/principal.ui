@@ -293,10 +293,10 @@ padding:2px;
              <attribute name="verticalHeaderVisible">
               <bool>false</bool>
              </attribute>
-             <attribute name="verticalHeaderMinimumSectionSize">
+             <attribute name="verticalHeaderDefaultSectionSize">
               <number>30</number>
              </attribute>
-             <attribute name="verticalHeaderDefaultSectionSize">
+             <attribute name="verticalHeaderMinimumSectionSize">
               <number>30</number>
              </attribute>
              <column>
@@ -305,6 +305,7 @@ padding:2px;
               </property>
               <property name="font">
                <font>
+                <weight>75</weight>
                 <bold>true</bold>
                </font>
               </property>
@@ -318,6 +319,7 @@ padding:2px;
               </property>
               <property name="font">
                <font>
+                <weight>75</weight>
                 <bold>true</bold>
                </font>
               </property>
@@ -331,6 +333,7 @@ padding:2px;
               </property>
               <property name="font">
                <font>
+                <weight>75</weight>
                 <bold>true</bold>
                </font>
               </property>
