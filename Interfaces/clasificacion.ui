@@ -71,7 +71,11 @@
         </widget>
        </item>
        <item row="1" column="0">
-        <widget class="QComboBox" name="cbAnio"/>
+        <widget class="QComboBox" name="cbAnio">
+         <property name="editable">
+          <bool>true</bool>
+         </property>
+        </widget>
        </item>
        <item row="0" column="0">
         <widget class="QLabel" name="label">
@@ -113,6 +117,12 @@
        <verstretch>1</verstretch>
       </sizepolicy>
      </property>
+     <attribute name="verticalHeaderVisible">
+      <bool>false</bool>
+     </attribute>
+     <attribute name="verticalHeaderHighlightSections">
+      <bool>false</bool>
+     </attribute>
      <column>
       <property name="text">
        <string>Posicion</string>

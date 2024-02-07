@@ -1,6 +1,7 @@
 import sys
 from PyQt5 import QtWidgets, QtGui, QtCore, uic, QtWebEngineWidgets, uic
 from PyQt5.QtCore import Qt
+from PyQt5.QtWidgets import QToolTip
 import requests
 import json
 from circuitos import Circuitos
@@ -18,14 +19,17 @@ class MyApp(QtWidgets.QWidget):
         self.bClasificacion.setIcon(QtGui.QIcon('Resources/Copa.png'))
         self.bClasificacion.setIconSize(QtCore.QSize(64, 64))
         self.bClasificacion.pressed.connect(self.Abrir_Clasificacion)
+        self.bClasificacion.setToolTip("Abrir ventana Clasificación")
 
         self.bPilotos.setIcon(QtGui.QIcon('Resources/Pilotos.png'))
         self.bPilotos.setIconSize(QtCore.QSize(64, 64))
         self.bPilotos.pressed.connect(self.Abrir_Pilotos)
+        self.bPilotos.setToolTip("Abrir ventana Pilotos")
 
         self.bCircuitos.setIcon(QtGui.QIcon('Resources/Circuitos.png'))
         self.bCircuitos.setIconSize(QtCore.QSize(64, 64))
         self.bCircuitos.pressed.connect(self.Abrir_Circuitos)
+        self.bCircuitos.setToolTip("Abrir ventana Estadísticas")
 
 
 
@@ -51,6 +55,9 @@ class MyApp(QtWidgets.QWidget):
         r = requests.get("http://ergast.com/api/f1/current/last/results.json")
         r = json.loads(r.text)
         resultado = r["MRData"]["RaceTable"]["Races"][0]["Results"]
+        # Obtener el nombre de la carrera
+        nombre_carrera = r["MRData"]["RaceTable"]["Races"][0]["raceName"]
+        self.label.setText(f"Último Resultado: {nombre_carrera}")
         for d in resultado:
             self.twResultados.insertRow(self.twResultados.rowCount())
             item = QtWidgets.QTableWidgetItem(d["position"])
@@ -67,6 +74,7 @@ class MyApp(QtWidgets.QWidget):
         r = requests.get("http://ergast.com/api/f1/current/driverStandings.json")
         r = json.loads(r.text)
         resultado = r["MRData"]["StandingsTable"]["StandingsLists"][0]["DriverStandings"]
+
         for d in resultado:
             self.twClasificacion.insertRow(self.twClasificacion.rowCount())
             item = QtWidgets.QTableWidgetItem(d["position"])

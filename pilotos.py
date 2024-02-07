@@ -1,8 +1,105 @@
 import sys
 import requests
-from PyQt5.QtWidgets import QApplication, QMainWindow, QHBoxLayout, QWidget, QLabel, QScrollArea, QVBoxLayout, QPushButton
+from PyQt5.QtWidgets import QApplication, QMainWindow, QHBoxLayout, QWidget, QLabel, QScrollArea, QVBoxLayout, QPushButton, QDialog, QTextEdit
 from PyQt5.QtGui import QFont, QPixmap
 from PyQt5.QtCore import Qt
+from bs4 import BeautifulSoup
+
+class DetallesPiloto(QDialog):
+    def __init__(self, piloto_info):
+        super().__init__()
+
+        self.setWindowTitle(f"Detalles de {piloto_info['nombre']} {piloto_info['apellido']}")
+        self.setGeometry(100, 100, 1000, 400)  # Modifica el tamaño de la ventana
+        layout = QHBoxLayout(self)
+
+
+
+        # Agrega la imagen del piloto en un QLabel
+        imagen_url = piloto_info["imagen_url"]
+        if imagen_url:
+            response = requests.get(imagen_url)
+            imagen_data = response.content
+            pixmap = QPixmap()
+            pixmap.loadFromData(imagen_data)
+            if not pixmap.isNull():
+                imagen_label = QLabel(self)
+                pixmap = pixmap.scaled(200,200,Qt.AspectRatioMode.KeepAspectRatio)
+                imagen_label.setPixmap(pixmap)
+                imagen_label.setAlignment(Qt.AlignmentFlag.AlignTop)
+                imagen_label.setScaledContents(True)
+                layout.addWidget(imagen_label)
+
+        # Ajusta el tamaño del cuadro de texto y la distancia entre elementos
+        textedit_width = 500
+        textedit_height = 300
+        spacing = 20
+
+        # Agrega una QVBoxLayout para el resto de la información
+        info_layout = QVBoxLayout()
+
+        # Agrega información detallada sobre el piloto en etiquetas
+        nombre_label = QLabel(f"Nombre: {piloto_info['nombre']} {piloto_info['apellido']}")
+        puntos_label = QLabel(f"Puntos: {piloto_info['puntos']}")
+        titulos_label = QLabel(f"Títulos Mundiales: {piloto_info['titulos_mundiales']}")
+
+        # Agrega una etiqueta para la biografía
+        biografia_label = QLabel("Biografía:")
+
+        # Obtén la biografía del piloto desde Wikipedia
+        biografia_texto = self.obtener_biografia_wikipedia(piloto_info)
+
+        # Agrega un QTextEdit para mostrar la biografía con un tamaño ajustado
+        biografia_textedit = QTextEdit()
+        biografia_textedit.setPlainText(biografia_texto)
+        biografia_textedit.setReadOnly(True)
+        biografia_textedit.setMaximumSize(textedit_width, textedit_height)
+
+        info_layout.addWidget(nombre_label)
+        info_layout.addWidget(puntos_label)
+        info_layout.addWidget(titulos_label)
+        info_layout.addWidget(biografia_label)
+        info_layout.addWidget(biografia_textedit)
+        info_layout.addSpacing(spacing)
+
+        # Ajusta el tamaño del layout de información y agrega el layout a la derecha de la imagen
+        info_layout.setContentsMargins(0, 0, 0, 0)
+        layout.addLayout(info_layout)
+
+        # Agrega el layout de información a la derecha de la imagen
+        layout.addLayout(info_layout)
+
+    def closeEvent(self, event):
+        # Esta función se llama cuando se cierra la ventana de detalles
+        event.accept()
+    def obtener_biografia_wikipedia(self, piloto_info):
+        # Ajustar el apellido para los casos específicos
+        if piloto_info['apellido'] == 'Sainz':
+            piloto_info['apellido'] = 'Sainz_Jr.'
+        elif piloto_info['apellido'] == 'Russell':
+            piloto_info['apellido'] = 'Russell_(piloto)'
+        # Obtener la URL de la página de Wikipedia del piloto
+        url_wikipedia = f"https://es.wikipedia.org/wiki/{piloto_info['nombre']}_{piloto_info['apellido']}"
+        response_wikipedia = requests.get(url_wikipedia)
+
+        if response_wikipedia.status_code == 200:
+            html = response_wikipedia.text
+
+            # Utilizar BeautifulSoup para analizar el HTML y extraer el texto de la introducción
+            soup = BeautifulSoup(html, 'html.parser')
+
+            # Encuentra el primer párrafo dentro de la clase "mw-parser-output"
+            primer_parrafo = soup.find('div', {'class': 'mw-parser-output'}).find('p')
+
+            # Si se encuentra el primer párrafo, obtén su texto
+            if primer_parrafo:
+                biografia_texto = primer_parrafo.text
+            else:
+                biografia_texto = "Información no disponible en Wikipedia."
+
+            return biografia_texto
+        else:
+            return "Error al obtener la información desde Wikipedia."
 
 class Pilotos(QMainWindow):
     def __init__(self):
@@ -32,7 +129,7 @@ class Pilotos(QMainWindow):
             card_widget.setStyleSheet("background-color: #f0f0f0; border: 1px solid #ccc; margin: 5px; padding: 5px;")
 
             # Crear una etiqueta para mostrar el nombre y los puntos en líneas separadas
-            nombre_label = QLabel(f"{piloto['nombre']} {piloto['apellido']}\nPuntos: {piloto['puntos']}\nPosición: {piloto['posicion']}\nVicotrias: {piloto['victorias']}\nTitulos: {piloto['titulos_mundiales']}")
+            nombre_label = QLabel(f"{piloto['nombre']} {piloto['apellido']}\nPuntos: {piloto['puntos']}\nPosición: {piloto['posicion']}\nTítulos: {piloto['titulos_mundiales']}")
             nombre_label.setFont(QFont("Times New Roman", 14))
 
             # Agrega una imagen desde la URL obtenida del diccionario de piloto.
@@ -71,6 +168,7 @@ class Pilotos(QMainWindow):
             card_layout.addWidget(imagen_label)
             card_layout.addWidget(nombre_label)
             card_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
+            card_widget.mousePressEvent = lambda event, piloto=piloto: self.mostrar_detalles(piloto)
 
             scroll_layout.addWidget(card_widget)
 
@@ -85,6 +183,10 @@ class Pilotos(QMainWindow):
         central_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
 
         self.setCentralWidget(central_widget)
+
+    def mostrar_detalles(self, piloto_info):
+        detalles_window = DetallesPiloto(piloto_info)
+        detalles_window.exec_()
 
 def obtener_pilotos():
     # Obtener los datos de la clasificación de pilotos desde la API de ergast.
@@ -128,7 +230,6 @@ def obtener_pilotos():
                     "apellido": piloto_data["Driver"]["familyName"],
                     "puntos": piloto_data["points"],
                     "imagen_url": f"https://media.formula1.com/content/dam/fom-website/drivers/2023Drivers/{piloto_data['Driver']['familyName']}.jpg.img.512.large.jpg",
-                    "victorias": victorias,
                     "titulos_mundiales": titulos_mundiales
                 }
 
@@ -136,7 +237,6 @@ def obtener_pilotos():
 
     return pilotos
 
-    return pilotos
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)

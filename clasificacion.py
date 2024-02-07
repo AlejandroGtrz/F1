@@ -23,6 +23,9 @@ class Clasificacion(QWidget):
 		uic.loadUi('Interfaces/clasificacion.ui', self)
 		self.cargarTemporadas()
 		self.bBuscar.pressed.connect(self.buscar)
+		self.cbAnio.setMaxVisibleItems(10)  # Ajustar el valor según sea necesario
+
+
 	
 	def buscar(self):
 		self.tableWidget.setRowCount(0)

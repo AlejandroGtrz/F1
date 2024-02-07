@@ -1,4 +1,4 @@
-años= ["2018","2019","2020","2021"]
+años= ["2018","2019","2020","2021","2022","2023"]
 
 circuitos1= ["australia", "barein", "china", "azerbaiyan", "barcelona", "monaco", "canada"
 , "francia", "austria", "gran bretaña", "alemania", "hungria", "belgica", "italia", "singapur",
@@ -16,8 +16,9 @@ circuitos4= ["barein", "imola", "portugal", "barcelona", "monaco", "azerbaiyan",
 , "gran bretaña", "hungria", "belgica", "holanda", "monza", "rusia", "turquia",
 "austin", "mexico", "brasil", "qatar", "jeddah", "abu dhabi"]
 
+
 estadisticas= ["Telemetria", "Desglose de marchas", "Desglose de velocidad", "Ver Qualy", "Tiempo por vuelta"]
 
 estadisticas_comparativas= ["Telemetria", "Tiempo por vuelta","Mapa de calor"]
 
-estadisticas_circuitos= ["Telemetria", "Tiempo por vuelta", "Adelantamientos", "Ver Qualy", "Vuelta rapida", "Tiempo medio pit stop", "Ritmo de carrera por piloto", "Marchas vuelta", "Mapa de velocidad", "Información de neumaticos" ]
+estadisticas_circuitos= ["Telemetria", "Tiempo por vuelta", "Adelantamientos", "Ver Qualy", "Tiempo medio pit stop", "Ritmo de carrera", "Marchas vuelta", "Mapa de velocidad", "Información de neumaticos" ]
