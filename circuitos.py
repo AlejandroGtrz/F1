@@ -302,7 +302,7 @@ class telemetriaThread(QThread):
         plt.close('all')
 
         ff1.Cache.enable_cache('./')
-        granPremio = ff1.get_session(int(self.year), 4, 'R')
+        granPremio = ff1.get_session(int(self.year), self.circuito, 'R')
         laps=granPremio.load()
         laps=granPremio.laps
         fig, ax = plt.subplots(3, sharex=True)
@@ -472,7 +472,7 @@ class infoParadasThread(QThread):
         data = response.json()
 
         races = data['MRData']['RaceTable']['Races']
-        circuit_round_map = {race['Circuit']['circuitName']: race['round'] for race in races}
+        circuit_round_map = {race['Circuit']['circuitId']: race['round'] for race in races}
 
         return circuit_round_map.get(circuit_name)
     def run(self):
@@ -510,7 +510,7 @@ class infoParadasThread(QThread):
         # Etiquetas y titulo
         ax.set_xlabel('Piloto')
         ax.set_ylabel('Tiempo medio pit stop (s)')
-        ax.set_title('Tiempo medio pit stop por Drivepilotor')
+        ax.set_title('Tiempo medio pit stop por piloto')
         fig.tight_layout()
         self.resultReady.emit(fig)
 
@@ -598,12 +598,12 @@ class Circuitos(QWidget):
         year=self.bAnio.currentText()
         circuits={}
         if len(circuits)==0:
-        	r = requests.get("https://ergast.com/api/f1/"+str(year)+"/circuits.json")
+        	r = requests.get("https://ergast.com/api/f1/"+str(year)+".json")
         	r = json.loads(r.text)
-        	circuits = r["MRData"]["CircuitTable"]["Circuits"]
+        	circuits = r["MRData"]["RaceTable"]["Races"]
         for s in circuits:
-            self.bCircuito.addItem(s['circuitName'])
-            self.circuitos[s['circuitName']]=s['circuitId']
+            self.bCircuito.addItem(s['raceName'])
+            self.circuitos[s['raceName']]=s["Circuit"]['circuitId']
 
         self.bCircuito.setCurrentIndex(-1)
 
@@ -629,10 +629,11 @@ class Circuitos(QWidget):
         self.bBuscar.setEnabled(True)
 
     def redirecciona(self):
+        print(self.circuitos)
         if(self.bEstadistica.currentText()=="Tiempo por vuelta"):
             pilotos = self.listaPilotos
             year = self.bAnio.currentText()
-            circuito = self.circuitos[self.bCircuito.currentText()]
+            circuito = self.bCircuito.currentText()
             
             # Paso 0: Crear una instancia de QDialog para mostrar la barra de progreso
             progress_dialog = QDialog(self)
@@ -666,7 +667,7 @@ class Circuitos(QWidget):
         if(self.bEstadistica.currentText()=="Telemetria"):
             pilotos = self.listaPilotos
             year = self.bAnio.currentText()
-            circuito = self.circuitos[self.bCircuito.currentText()]
+            circuito = self.bCircuito.currentText()
             
             # Paso 0: Crear una instancia de QDialog para mostrar la barra de progreso
             progress_dialog = QDialog(self)
@@ -700,7 +701,7 @@ class Circuitos(QWidget):
         if(self.bEstadistica.currentText()=="Adelantamientos"):
             pilotos = self.listaPilotos
             year = self.bAnio.currentText()
-            circuito = self.circuitos[self.bCircuito.currentText()]
+            circuito = self.bCircuito.currentText()
             
             # Paso 0: Crear una instancia de QDialog para mostrar la barra de progreso
             progress_dialog = QDialog(self)
@@ -734,7 +735,7 @@ class Circuitos(QWidget):
         if(self.bEstadistica.currentText()=="Marchas vuelta"):
             pilotos = self.listaPilotos
             year = self.bAnio.currentText()
-            circuito = self.circuitos[self.bCircuito.currentText()]
+            circuito =self.bCircuito.currentText()
             
             # Paso 0: Crear una instancia de QDialog para mostrar la barra de progreso
             progress_dialog = QDialog(self)
@@ -768,7 +769,7 @@ class Circuitos(QWidget):
         if(self.bEstadistica.currentText()=="Ver Qualy"):
             pilotos = self.listaPilotos
             year = self.bAnio.currentText()
-            circuito = self.circuitos[self.bCircuito.currentText()]
+            circuito = self.bCircuito.currentText()
             
             # Paso 0: Crear una instancia de QDialog para mostrar la barra de progreso
             progress_dialog = QDialog(self)
@@ -802,7 +803,7 @@ class Circuitos(QWidget):
         if(self.bEstadistica.currentText()=="Tiempo medio pit stop"):
             pilotos = self.listaPilotos
             year = self.bAnio.currentText()
-            circuito = self.bCircuito.currentText()
+            circuito = self.circuitos[self.bCircuito.currentText()]
             
             # Paso 0: Crear una instancia de QDialog para mostrar la barra de progreso
             progress_dialog = QDialog(self)
@@ -836,7 +837,7 @@ class Circuitos(QWidget):
         if(self.bEstadistica.currentText()=="Mapa de velocidad"):
             pilotos = self.listaPilotos
             year = self.bAnio.currentText()
-            circuito = self.circuitos[self.bCircuito.currentText()]
+            circuito = self.bCircuito.currentText()
             
             # Paso 0: Crear una instancia de QDialog para mostrar la barra de progreso
             progress_dialog = QDialog(self)
@@ -870,7 +871,7 @@ class Circuitos(QWidget):
         if(self.bEstadistica.currentText()=="Información de neumaticos"):
             pilotos = self.listaPilotos
             year = self.bAnio.currentText()
-            circuito = self.circuitos[self.bCircuito.currentText()]
+            circuito = self.bCircuito.currentText()
             
             # Paso 0: Crear una instancia de QDialog para mostrar la barra de progreso
             progress_dialog = QDialog(self)
@@ -904,7 +905,7 @@ class Circuitos(QWidget):
         if(self.bEstadistica.currentText()=="Ritmo de carrera"):
             pilotos = self.listaPilotos
             year = self.bAnio.currentText()
-            circuito = self.circuitos[self.bCircuito.currentText()]
+            circuito = self.bCircuito.currentText()
             
             # Paso 0: Crear una instancia de QDialog para mostrar la barra de progreso
             progress_dialog = QDialog(self)
