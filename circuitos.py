@@ -51,7 +51,7 @@ class mapaVelocidadThread(QThread):
             return
 
         ff1.Cache.enable_cache('./')
-        session = ff1.get_session(int(self.year), self.circuito, 'R')
+        session = ff1.get_session(int(self.year), int(self.circuito), 'R')
         weekend = session.event
         session.load()
         lap = session.laps.pick_fastest()
@@ -143,7 +143,8 @@ class verQualyThread(QThread):
     def run(self):
         ff1.Cache.enable_cache('./')
         ff1.plotting.setup_mpl(mpl_timedelta_support=True, color_scheme=None, misc_mpl_mods=False)
-        quali = ff1.get_session(int(self.year), self.circuito, 'Q')
+        quali = ff1.get_session(int(self.year), int(self.circuito), 'Q')
+        print(self.circuito)
         quali.load()
         laps = quali.laps
         drivers = pd.unique(laps['Driver'])
@@ -194,7 +195,7 @@ class infoNeumaticosThread(QThread):
         
     def run(self):
         ff1.Cache.enable_cache('./')
-        session = ff1.get_session(int(self.year), self.circuito, 'R')
+        session = ff1.get_session(int(self.year), int(self.circuito), 'R')
         session.load()
         laps = session.laps
         drivers = session.drivers
@@ -252,7 +253,7 @@ class tiempoVueltasThread(QThread):
         
     def run(self):
         ff1.Cache.enable_cache('./')
-        granPremio = ff1.get_session(int(self.year), self.circuito, 'R')
+        granPremio = ff1.get_session(int(self.year), int(self.circuito), 'R')
         granPremio.load()
         laps=granPremio.laps
         fig, ax = plt.subplots()
@@ -302,7 +303,7 @@ class telemetriaThread(QThread):
         plt.close('all')
 
         ff1.Cache.enable_cache('./')
-        granPremio = ff1.get_session(int(self.year), self.circuito, 'R')
+        granPremio = ff1.get_session(int(self.year), int(self.circuito), 'R')
         laps=granPremio.load()
         laps=granPremio.laps
         fig, ax = plt.subplots(3, sharex=True)
@@ -373,7 +374,7 @@ class adelantamientosThread(QThread):
         
     def run(self):
         ff1.Cache.enable_cache('./')
-        session = ff1.get_session(int(self.year), self.circuito, 'R')
+        session = ff1.get_session(int(self.year), int(self.circuito), 'R')
         session.load(telemetry=False, weather=False)
         fig, ax = plt.subplots(figsize=(8.0, 4.9))
         for drv in session.drivers:
@@ -412,7 +413,7 @@ class marchasVueltaThread(QThread):
         
     def run(self):
         ff1.Cache.enable_cache('./')
-        session = ff1.get_session(int(self.year), self.circuito, 'R')
+        session = ff1.get_session(int(self.year), int(self.circuito), 'R')
         print(self.circuito)
         session.load()
         laps = session.laps
@@ -479,8 +480,7 @@ class infoParadasThread(QThread):
         base_url = 'http://ergast.com/api/f1'
         year = self.year
         circuit_name = self.circuito
-        round_number = self.get_round_number(year, circuit_name)
-        url = f'{base_url}/{year}/{round_number}/pitstops.json'
+        url = f'{base_url}/{year}/{circuit_name}/pitstops.json'
 
         response = requests.get(url)
         data = response.json()
@@ -510,7 +510,7 @@ class infoParadasThread(QThread):
         # Etiquetas y titulo
         ax.set_xlabel('Piloto')
         ax.set_ylabel('Tiempo medio pit stop (s)')
-        ax.set_title('Tiempo medio pit stop por Drivepilotor')
+        ax.set_title('Tiempo medio pit stop por Piloto')
         fig.tight_layout()
         self.resultReady.emit(fig)
 
@@ -598,12 +598,14 @@ class Circuitos(QWidget):
         year=self.bAnio.currentText()
         circuits={}
         if len(circuits)==0:
-        	r = requests.get("https://ergast.com/api/f1/"+str(year)+"/circuits.json")
+        	r = requests.get("https://ergast.com/api/f1/"+str(year)+".json")
         	r = json.loads(r.text)
-        	circuits = r["MRData"]["CircuitTable"]["Circuits"]
+        	circuits = r["MRData"]["RaceTable"]["Races"]
         for s in circuits:
-            self.bCircuito.addItem(s['circuitName'])
-            self.circuitos[s['circuitName']]=s['circuitId']
+            circuit_name = s["Circuit"]["circuitName"]
+            round_number = s["round"]
+            self.bCircuito.addItem(circuit_name)
+            self.circuitos[circuit_name]=round_number
 
         self.bCircuito.setCurrentIndex(-1)
 
