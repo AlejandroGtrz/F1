@@ -157,7 +157,11 @@ class verQualyThread(QThread):
         team_colors = list()
         for index, lap in fastest_laps.iterlaps():
             if pd.notna(lap['Team']):  # comprobamos que el valor del equipo no sea NaT
-                color = ff1.plotting.team_color(lap['Team'])
+                try:
+                    color = ff1.plotting.team_color(lap['Team'])
+                except KeyError:
+                    # Si no se encuentra el color para el equipo, asignamos un color genérico
+                    color = 'grey'
                 team_colors.append(color)
             else:
                 team_colors.append('pink')  # en caso de que lo sea añadimos un color por defecto
@@ -210,13 +214,18 @@ class infoNeumaticosThread(QThread):
             driver_stints = stints.loc[stints["Driver"] == driver]
             previous_stint_end = 0
             for idx, row in driver_stints.iterrows():
-                # Añadimos la información del compuesto al diccionario
-                legend_dict[row["Compound"]] = ff1.plotting.COMPOUND_COLORS[row["Compound"]]
+                compound=row["Compound"]
+                if compound not in legend_dict:
+                    if compound in ff1.plotting.COMPOUND_COLORS:
+                        legend_dict[compound] = ff1.plotting.COMPOUND_COLORS[compound]
+                    else:
+                        # Si el compuesto no está en el diccionario de colores, asignamos un color predeterminado
+                        legend_dict[compound] = 'grey'  # O el color que desees asignar en este caso
                 plt.barh(
                     y=driver,
                     width=row["StintLength"],
                     left=previous_stint_end,
-                    color=ff1.plotting.COMPOUND_COLORS[row["Compound"]],
+                    color=legend_dict[compound],
                     edgecolor="black",
                     fill=True
                 )
